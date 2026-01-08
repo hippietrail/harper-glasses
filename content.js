@@ -7,17 +7,23 @@
   const container = document.createElement("div");
   container.id = "cstpt-container";
 
-  // Basic fixed positioning in the corner
+  // Calculate dimensions before creating elements
+  const halfWidth = Math.floor(window.innerWidth / 2);
+  const halfHeight = Math.floor(window.innerHeight / 2);
+
+  // Start off-screen so it's hidden but visible to Harper's grammar checker.
+  // Harper's isVisible() check looks at getBoundingClientRect() and CSS properties,
+  // so we need the element to have valid dimensions, even if off-screen initially.
   Object.assign(container.style, {
     position: "fixed",
-    top: "50%",
-    left: "50%",
-    transform: "translate(-50%, -50%)", // center it
+    top: "-9999px",
+    left: "-9999px",
+    width: `${halfWidth}px`,
+    height: `${halfHeight}px`,
     zIndex: "2147483647",
     background: "white",
     border: "1px solid #ccc",
     padding: "4px",
-    display: "none",
     boxShadow: "0 4px 16px rgba(0, 0, 0, 0.25)",
     boxSizing: "border-box",
   });
@@ -25,11 +31,8 @@
   const textarea = document.createElement("textarea");
   textarea.id = "cstpt-textarea";
 
-  const halfWidth = Math.floor(window.innerWidth / 2);
-  const halfHeight = Math.floor(window.innerHeight / 2);
-
-  textarea.style.width = `${halfWidth}px`;
-  textarea.style.height = `${halfHeight}px`;
+  textarea.style.width = "100%";
+  textarea.style.height = "100%";
   textarea.style.boxSizing = "border-box";
 
   textarea.rows = 6;   // can keep or drop, mostly overridden by explicit height
@@ -42,8 +45,10 @@
 
   chrome.runtime.onMessage.addListener((message, _sender, _sendResponse) => {
     if (message?.type === "GRAB_SELECTION") {
-      // Show the panel
-      container.style.display = "block";
+      // Show the panel - move it to center of screen
+      container.style.top = "50%";
+      container.style.left = "50%";
+      container.style.transform = "translate(-50%, -50%)";
 
       // Grab current selection
       const selection = window.getSelection();
@@ -57,10 +62,10 @@
 
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape") {
-      // Only hide if currently visible
-      if (container.style.display !== "none") {
-        container.style.display = "none";
-      }
+      // Hide panel - move it off-screen
+      container.style.top = "-9999px";
+      container.style.left = "-9999px";
+      container.style.transform = "";
     }
   });
 })();
