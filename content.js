@@ -16,13 +16,12 @@
   const halfWidth = Math.floor(window.innerWidth / 2);
   const halfHeight = Math.floor(window.innerHeight / 2);
 
-  // Start off-screen so it's hidden but visible to Harper's grammar checker.
-  // Harper's isVisible() check looks at getBoundingClientRect() and CSS properties,
-  // so we need the element to have valid dimensions, even if off-screen initially.
+  // Start visible and centered on screen so Harper can detect and check it immediately
   Object.assign(container.style, {
     position: "fixed",
-    top: "-9999px",
-    left: "-9999px",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
     width: `${halfWidth}px`,
     height: `${halfHeight}px`,
     zIndex: "2147483647",
@@ -35,8 +34,6 @@
 
   const textarea = document.createElement("textarea");
   textarea.id = "cstpt-textarea";
-  // Mark this textarea so Harper recognizes it even when hidden
-  textarea.setAttribute("data-harper-glasses", "true");
 
   textarea.style.width = "100%";
   textarea.style.height = "100%";
@@ -48,33 +45,28 @@
   container.appendChild(textarea);
   document.body.appendChild(container);
 
-  console.log(`🥽 Harper Glasses [${BUILD_ID}] textarea injected and ready`);
+  console.log(`🥽 Harper Glasses [${BUILD_ID}] textarea injected and ready (visible on-screen)`);
 
   chrome.runtime.onMessage.addListener((message, _sender, _sendResponse) => {
     if (message?.type === "GRAB_SELECTION") {
-      // Show the panel - move it to center of screen
-      container.style.top = "50%";
-      container.style.left = "50%";
-      container.style.transform = "translate(-50%, -50%)";
-
-      // Grab current selection
+      // Grab current selection and update textarea
       const selection = window.getSelection();
       const text = selection ? selection.toString() : "";
       textarea.value = text;
 
-      console.log(`🥽 Harper Glasses [${BUILD_ID}] popup shown with ${text.length} characters`);
+      console.log(`🥽 Harper Glasses [${BUILD_ID}] selection updated: ${text.length} characters`);
 
-      // Optional: focus textarea so other extension sees active caret
+      // Focus textarea so user can edit and Harper checks it
       textarea.focus();
     }
   });
 
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape") {
-      // Hide panel - move it off-screen
-      container.style.top = "-9999px";
-      container.style.left = "-9999px";
-      container.style.transform = "";
+      // Hide the popup by removing it from DOM
+      // (User can click glasses button again to show it with new selection)
+      container.style.display = "none";
+      console.log(`🥽 Harper Glasses [${BUILD_ID}] popup hidden (press glasses button to show again)`);
     }
   });
 })();
