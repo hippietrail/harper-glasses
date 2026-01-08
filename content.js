@@ -43,6 +43,13 @@
   textarea.cols = 40;  // same
 
   container.appendChild(textarea);
+  
+  // Log when we add to DOM to help debug MutationObserver
+  const observer = new MutationObserver((mutations) => {
+    console.log(`🥽 Harper Glasses [${BUILD_ID}] detected DOM mutation (${mutations.length} mutations)`);
+  });
+  observer.observe(document.body, { childList: true, subtree: true });
+  
   document.body.appendChild(container);
 
   console.log(`🥽 Harper Glasses [${BUILD_ID}] textarea injected and ready (visible on-screen)`);
