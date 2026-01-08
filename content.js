@@ -1,6 +1,11 @@
 (() => {
+  // Build ID for debugging - update this when making changes
+  const BUILD_ID = "v0.0.2-" + new Date().toISOString().slice(0, 10);
+  console.log(`🥽 Harper Glasses [${BUILD_ID}] initializing`);
+
   // Avoid adding multiple times if the script runs again
   if (document.getElementById("cstpt-container")) {
+    console.log(`🥽 Harper Glasses [${BUILD_ID}] already injected, skipping`);
     return;
   }
 
@@ -43,7 +48,7 @@
   container.appendChild(textarea);
   document.body.appendChild(container);
 
-  console.log("chrome-selection-to-popup-textarea: injected textarea");
+  console.log(`🥽 Harper Glasses [${BUILD_ID}] textarea injected and ready`);
 
   chrome.runtime.onMessage.addListener((message, _sender, _sendResponse) => {
     if (message?.type === "GRAB_SELECTION") {
@@ -56,6 +61,8 @@
       const selection = window.getSelection();
       const text = selection ? selection.toString() : "";
       textarea.value = text;
+
+      console.log(`🥽 Harper Glasses [${BUILD_ID}] popup shown with ${text.length} characters`);
 
       // Optional: focus textarea so other extension sees active caret
       textarea.focus();
