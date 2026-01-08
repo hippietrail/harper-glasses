@@ -30,6 +30,8 @@
 
   const textarea = document.createElement("textarea");
   textarea.id = "cstpt-textarea";
+  // Mark this textarea so Harper recognizes it even when hidden
+  textarea.setAttribute("data-harper-glasses", "true");
 
   textarea.style.width = "100%";
   textarea.style.height = "100%";
