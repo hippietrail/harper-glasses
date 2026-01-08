@@ -1,0 +1,70 @@
+═══════════════════════════════════════════════════════════════════════════════
+  INSTALL & TEST: Harper + Harper Glasses
+═══════════════════════════════════════════════════════════════════════════════
+
+BUILD HARPER EXTENSION (1-2 minutes)
+───────────────────────────────────
+  $ cd ~/harper-the-second/harper
+  $ just build-chrome-plugin
+  
+  ✓ Output: packages/chrome-plugin/build/
+
+INSTALL IN CHROME
+────────────────────
+  1. Open: chrome://extensions
+  
+  2. Enable "Developer mode" (top right toggle)
+  
+  3. Click "Load unpacked"
+     → Select: /Users/hippietrail/chrome-selection-to-popup-textarea
+  
+  4. Click "Load unpacked" again
+     → Select: /Users/hippietrail/harper-the-second/harper/packages/chrome-plugin/build
+
+VERIFY INSTALLATION
+───────────────────
+  ✓ See "Harper Glasses 👓" extension in chrome://extensions
+  ✓ See "Private Grammar Checker - Harper" extension in chrome://extensions
+  ✓ Both have active toggle switches
+
+TEST IT
+───────
+  1. Visit: en.wikipedia.org
+  
+  2. Select problematic text
+     Example: "Me and him is happy" (or any grammar error)
+  
+  3. Click Harper Glasses 👓 button in toolbar
+  
+  4. ✓ EXPECTED: Popup appears with grammar errors highlighted
+  
+  5. Press Escape to close
+
+ITERATE (OPTIONAL)
+──────────────────
+  For faster development without rebuilding:
+  
+  $ cd ~/harper-the-second/harper
+  $ just dev-chrome-plugin
+  
+  → Leaves running with auto-reload
+  → Edit files, refresh extension to see changes
+  → Press Ctrl+C when done
+
+TROUBLESHOOTING
+───────────────
+  Extensions don't appear?
+    → Refresh chrome://extensions page
+    → Check console for errors
+  
+  No grammar errors shown?
+    → Verify both extensions enabled
+    → Check DevTools console (F12)
+    → Rebuild: just build-chrome-plugin
+  
+  Glasses button does nothing?
+    → Open DevTools, look for errors
+    → Refresh the page
+    → Check extension details in chrome://extensions
+
+═══════════════════════════════════════════════════════════════════════════════
