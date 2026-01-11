@@ -61,13 +61,13 @@
 
   function createPopup() {
     // Avoid adding multiple times if the script runs again
-    if (document.getElementById("cstpt-container")) {
+    if (document.getElementById("hgl-container")) {
       console.log(`🥽 Harper Glasses [${BUILD_ID}] popup already exists`);
-      return document.getElementById("cstpt-container").querySelector("textarea");
+      return document.getElementById("hgl-container").querySelector("textarea");
     }
 
     container = document.createElement("div");
-    container.id = "cstpt-container";
+    container.id = "hgl-container";
 
     // Calculate dimensions before creating elements
     const halfWidth = Math.floor(window.innerWidth / 2);
@@ -98,7 +98,7 @@
 
     // Create title bar
     const titleBar = document.createElement("div");
-    titleBar.id = "cstpt-titlebar";
+    titleBar.id = "hgl-titlebar";
     Object.assign(titleBar.style, {
       backgroundColor: colors.fgColor === "rgb(0, 0, 0)" ? "#f0f0f0" : "#333",
       color: colors.fgColor,
@@ -156,7 +156,7 @@
     });
 
     textarea = document.createElement("textarea");
-    textarea.id = "cstpt-textarea";
+    textarea.id = "hgl-textarea";
     Object.assign(textarea.style, {
       width: "100%",
       height: "100%",
@@ -178,7 +178,7 @@
 
     // Create resize handle
     const resizeHandle = document.createElement("div");
-    resizeHandle.id = "cstpt-resize";
+    resizeHandle.id = "hgl-resize";
     resizeHandle.textContent = "⋱";
     Object.assign(resizeHandle.style, {
       position: "absolute",
