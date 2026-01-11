@@ -5,6 +5,7 @@
 
   let container = null;
   let textarea = null;
+  let contentEditable = null;
   let isDragging = false;
   let dragOffsetX = 0;
   let dragOffsetY = 0;
@@ -13,6 +14,7 @@
   let resizeStartY = 0;
   let resizeStartWidth = 0;
   let resizeStartHeight = 0;
+  let isUsingContentEditable = false;
 
   // Calculate contrast ratio between two RGB colors
   function getContrastRatio(rgb1, rgb2) {
@@ -57,6 +59,92 @@
       bgColor: "rgb(255, 255, 255)",
       fgColor: "rgb(0, 0, 0)"
     };
+  }
+
+  // Toggle between textarea and contenteditable div
+  function toggleEditMode() {
+    if (!container) return;
+
+    const wrapper = container.querySelector("[style*='flex: 1']");
+    if (!wrapper) return;
+
+    const currentContent = isUsingContentEditable 
+      ? contentEditable.textContent 
+      : textarea.value;
+
+    if (isUsingContentEditable) {
+      // Switch to textarea
+      contentEditable.remove();
+      contentEditable = null;
+
+      textarea = document.createElement("textarea");
+      textarea.id = "hgl-textarea";
+      Object.assign(textarea.style, {
+        width: "100%",
+        height: "100%",
+        boxSizing: "border-box",
+        border: "none",
+        fontFamily: "monospace",
+        fontSize: "13px",
+        resize: "none",
+        padding: "8px",
+        color: container.style.color,
+        backgroundColor: container.style.backgroundColor,
+      });
+      textarea.value = currentContent;
+      textarea.addEventListener("keydown", handleKeydown);
+      wrapper.insertBefore(textarea, wrapper.querySelector("#hgl-resize"));
+      textarea.focus();
+      
+      isUsingContentEditable = false;
+      console.log(`🥽 Harper Glasses [${BUILD_ID}] switched to textarea mode`);
+    } else {
+      // Switch to contenteditable
+      textarea.remove();
+      textarea = null;
+
+      contentEditable = document.createElement("div");
+      contentEditable.id = "hgl-contenteditable";
+      contentEditable.contentEditable = "true";
+      Object.assign(contentEditable.style, {
+        width: "100%",
+        height: "100%",
+        boxSizing: "border-box",
+        border: "none",
+        fontFamily: "monospace",
+        fontSize: "13px",
+        padding: "8px",
+        color: container.style.color,
+        backgroundColor: container.style.backgroundColor,
+        overflow: "auto",
+      });
+      contentEditable.textContent = currentContent;
+      contentEditable.addEventListener("keydown", handleKeydown);
+      wrapper.insertBefore(contentEditable, wrapper.querySelector("#hgl-resize"));
+      contentEditable.focus();
+      
+      isUsingContentEditable = true;
+      console.log(`🥽 Harper Glasses [${BUILD_ID}] switched to contenteditable mode`);
+    }
+  }
+
+  // Handle keyboard shortcuts
+  function handleKeydown(event) {
+    // Ctrl+Shift+E to toggle edit mode
+    if (event.ctrlKey && event.shiftKey && event.key === "e") {
+      event.preventDefault();
+      toggleEditMode();
+      return;
+    }
+
+    // Escape to close
+    if (event.key === "Escape") {
+      container.remove();
+      container = null;
+      textarea = null;
+      contentEditable = null;
+      console.log(`🥽 Harper Glasses [${BUILD_ID}] popup removed via Escape key`);
+    }
   }
 
   function createPopup() {
@@ -172,6 +260,7 @@
 
     textarea.rows = 6;
     textarea.cols = 40;
+    textarea.addEventListener("keydown", handleKeydown);
 
     textareaWrapper.appendChild(textarea);
     container.appendChild(textareaWrapper);
@@ -195,6 +284,7 @@
     });
 
     textareaWrapper.appendChild(resizeHandle);
+    isUsingContentEditable = false;
 
     document.body.appendChild(container);
     console.log(`🥽 Harper Glasses [${BUILD_ID}] popup created and visible on-screen`);
@@ -238,16 +328,6 @@
       resizeStartY = e.clientY;
       resizeStartWidth = rect.width;
       resizeStartHeight = rect.height;
-    });
-
-    // Listen for Escape key on this specific textarea
-    textarea.addEventListener("keydown", (event) => {
-      if (event.key === "Escape") {
-        container.remove();
-        container = null;
-        textarea = null;
-        console.log(`🥽 Harper Glasses [${BUILD_ID}] popup removed via Escape key`);
-      }
     });
 
     return textarea;
