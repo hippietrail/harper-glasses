@@ -131,7 +131,7 @@
   // Handle keyboard shortcuts
   function handleKeydown(event) {
     // Ctrl+Shift+E to toggle edit mode
-    if (event.ctrlKey && event.shiftKey && event.key === "e") {
+    if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === "e") {
       event.preventDefault();
       toggleEditMode();
       return;
