@@ -1,10 +1,63 @@
 (() => {
   // Build ID for debugging - update this when making changes
-  const BUILD_ID = "v0.0.3-" + new Date().toISOString().slice(0, 10);
+  const BUILD_ID = "v0.0.4-" + new Date().toISOString().slice(0, 10);
   console.log(`🥽 Harper Glasses [${BUILD_ID}] initializing`);
 
   let container = null;
   let textarea = null;
+  let isDragging = false;
+  let dragOffsetX = 0;
+  let dragOffsetY = 0;
+  let isResizing = false;
+  let resizeStartX = 0;
+  let resizeStartY = 0;
+  let resizeStartWidth = 0;
+  let resizeStartHeight = 0;
+
+  // Calculate contrast ratio between two RGB colors
+  function getContrastRatio(rgb1, rgb2) {
+    const getLuminance = (r, g, b) => {
+      const [rs, gs, bs] = [r, g, b].map(val => {
+        val = val / 255;
+        return val <= 0.03928 ? val / 12.92 : Math.pow((val + 0.055) / 1.055, 2.4);
+      });
+      return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
+    };
+
+    const l1 = getLuminance(rgb1[0], rgb1[1], rgb1[2]);
+    const l2 = getLuminance(rgb2[0], rgb2[1], rgb2[2]);
+    const lighter = Math.max(l1, l2);
+    const darker = Math.min(l1, l2);
+    return (lighter + 0.05) / (darker + 0.05);
+  }
+
+  // Parse RGB string to array
+  function parseRGB(rgbString) {
+    const match = rgbString.match(/\d+/g);
+    return match ? [parseInt(match[0]), parseInt(match[1]), parseInt(match[2])] : null;
+  }
+
+  // Adjust colors for accessibility if needed
+  function ensureContrast(bgColor, fgColor) {
+    const bg = parseRGB(bgColor);
+    const fg = parseRGB(fgColor);
+    
+    if (!bg || !fg) return { bgColor, fgColor }; // Fallback if parsing fails
+
+    const ratio = getContrastRatio(bg, fg);
+    
+    // WCAG AA standard requires 4.5:1 for normal text
+    if (ratio >= 4.5) {
+      return { bgColor, fgColor };
+    }
+
+    // If contrast is poor, use safe defaults
+    console.log(`🥽 Low contrast ratio (${ratio.toFixed(2)}:1), using safe colors`);
+    return {
+      bgColor: "rgb(255, 255, 255)",
+      fgColor: "rgb(0, 0, 0)"
+    };
+  }
 
   function createPopup() {
     // Avoid adding multiple times if the script runs again
@@ -20,6 +73,9 @@
     const halfWidth = Math.floor(window.innerWidth / 2);
     const halfHeight = Math.floor(window.innerHeight / 2);
 
+    // Check contrast and adjust colors if needed
+    const colors = ensureContrast("rgb(255, 255, 255)", "rgb(0, 0, 0)");
+
     // Visible and centered on screen
     Object.assign(container.style, {
       position: "fixed",
@@ -29,36 +85,165 @@
       width: `${halfWidth}px`,
       height: `${halfHeight}px`,
       zIndex: "2147483647",
-      background: "white",
+      background: colors.bgColor,
+      color: colors.fgColor,
       border: "1px solid #ccc",
-      padding: "4px",
+      padding: "0",
       boxShadow: "0 4px 16px rgba(0, 0, 0, 0.25)",
       boxSizing: "border-box",
+      display: "flex",
+      flexDirection: "column",
+      fontFamily: "system-ui, -apple-system, sans-serif",
+    });
+
+    // Create title bar
+    const titleBar = document.createElement("div");
+    titleBar.id = "cstpt-titlebar";
+    Object.assign(titleBar.style, {
+      backgroundColor: colors.fgColor === "rgb(0, 0, 0)" ? "#f0f0f0" : "#333",
+      color: colors.fgColor,
+      padding: "8px 12px",
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      cursor: "move",
+      userSelect: "none",
+      borderBottom: "1px solid #ccc",
+      fontSize: "13px",
+      fontWeight: "500",
+      minHeight: "32px",
+    });
+
+    const titleText = document.createElement("span");
+    titleText.textContent = "Harper Glasses • Check if Harper is enabled for this site";
+    titleBar.appendChild(titleText);
+
+    // Create close button
+    const closeBtn = document.createElement("button");
+    closeBtn.textContent = "✕";
+    Object.assign(closeBtn.style, {
+      background: "none",
+      border: "none",
+      cursor: "pointer",
+      fontSize: "20px",
+      padding: "0 4px",
+      color: colors.fgColor,
+      minWidth: "32px",
+      minHeight: "32px",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      flex: "0 0 auto",
+    });
+    closeBtn.addEventListener("click", () => {
+      container.remove();
+      container = null;
+      textarea = null;
+      console.log(`🥽 Harper Glasses [${BUILD_ID}] popup closed via X button`);
+    });
+    titleBar.appendChild(closeBtn);
+
+    container.appendChild(titleBar);
+
+    // Create textarea wrapper for flex layout
+    const textareaWrapper = document.createElement("div");
+    Object.assign(textareaWrapper.style, {
+      flex: "1",
+      overflow: "hidden",
+      padding: "4px",
+      boxSizing: "border-box",
+      position: "relative",
     });
 
     textarea = document.createElement("textarea");
     textarea.id = "cstpt-textarea";
+    Object.assign(textarea.style, {
+      width: "100%",
+      height: "100%",
+      boxSizing: "border-box",
+      border: "none",
+      fontFamily: "monospace",
+      fontSize: "13px",
+      resize: "none", // We handle resize manually
+      padding: "8px",
+      color: colors.fgColor,
+      backgroundColor: colors.bgColor,
+    });
 
-    textarea.style.width = "100%";
-    textarea.style.height = "100%";
-    textarea.style.boxSizing = "border-box";
+    textarea.rows = 6;
+    textarea.cols = 40;
 
-    textarea.rows = 6;   // can keep or drop, mostly overridden by explicit height
-    textarea.cols = 40;  // same
+    textareaWrapper.appendChild(textarea);
+    container.appendChild(textareaWrapper);
 
-    container.appendChild(textarea);
-    
+    // Create resize handle
+    const resizeHandle = document.createElement("div");
+    resizeHandle.id = "cstpt-resize";
+    Object.assign(resizeHandle.style, {
+      position: "absolute",
+      bottom: "0",
+      right: "0",
+      width: "16px",
+      height: "16px",
+      cursor: "nwse-resize",
+      backgroundColor: "#ddd",
+      borderTop: "1px solid #ccc",
+      borderLeft: "1px solid #ccc",
+    });
+
+    textareaWrapper.appendChild(resizeHandle);
+
     document.body.appendChild(container);
     console.log(`🥽 Harper Glasses [${BUILD_ID}] popup created and visible on-screen`);
+
+    // Dragging logic
+    titleBar.addEventListener("mousedown", (e) => {
+      isDragging = true;
+      const rect = container.getBoundingClientRect();
+      dragOffsetX = e.clientX - rect.left;
+      dragOffsetY = e.clientY - rect.top;
+    });
+
+    document.addEventListener("mousemove", (e) => {
+      if (isDragging && container) {
+        const x = e.clientX - dragOffsetX;
+        const y = e.clientY - dragOffsetY;
+        container.style.left = `${x}px`;
+        container.style.top = `${y}px`;
+        container.style.transform = "none"; // Remove centering transform
+      }
+
+      if (isResizing && container) {
+        const newWidth = Math.max(200, resizeStartWidth + (e.clientX - resizeStartX));
+        const newHeight = Math.max(150, resizeStartHeight + (e.clientY - resizeStartY));
+        container.style.width = `${newWidth}px`;
+        container.style.height = `${newHeight}px`;
+      }
+    });
+
+    document.addEventListener("mouseup", () => {
+      isDragging = false;
+      isResizing = false;
+    });
+
+    // Resizing logic
+    resizeHandle.addEventListener("mousedown", (e) => {
+      e.stopPropagation();
+      isResizing = true;
+      const rect = container.getBoundingClientRect();
+      resizeStartX = e.clientX;
+      resizeStartY = e.clientY;
+      resizeStartWidth = rect.width;
+      resizeStartHeight = rect.height;
+    });
 
     // Listen for Escape key on this specific textarea
     textarea.addEventListener("keydown", (event) => {
       if (event.key === "Escape") {
-        // Remove the popup from DOM entirely
         container.remove();
         container = null;
         textarea = null;
-        console.log(`🥽 Harper Glasses [${BUILD_ID}] popup removed (click glasses button to create new one)`);
+        console.log(`🥽 Harper Glasses [${BUILD_ID}] popup removed via Escape key`);
       }
     });
 
