@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Harper Glasses",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Send any page selection into an editable textarea so Harper can check its grammar.",
   "action": {
     "default_popup": "popup.html",
