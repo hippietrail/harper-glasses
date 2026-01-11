@@ -115,7 +115,7 @@
     });
 
     const titleText = document.createElement("span");
-    titleText.textContent = "Harper Glasses • Check if Harper is enabled for this site";
+    titleText.textContent = "🧐 Harper Glasses • Check if Harper is enabled for this site";
     titleBar.appendChild(titleText);
 
     // Create close button
@@ -179,6 +179,7 @@
     // Create resize handle
     const resizeHandle = document.createElement("div");
     resizeHandle.id = "cstpt-resize";
+    resizeHandle.textContent = "⋱";
     Object.assign(resizeHandle.style, {
       position: "absolute",
       bottom: "0",
@@ -186,9 +187,11 @@
       width: "16px",
       height: "16px",
       cursor: "nwse-resize",
-      backgroundColor: "#ddd",
-      borderTop: "1px solid #ccc",
-      borderLeft: "1px solid #ccc",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      fontSize: "14px",
+      color: "#999",
     });
 
     textareaWrapper.appendChild(resizeHandle);
