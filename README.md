@@ -70,13 +70,3 @@ Changes auto-reload—just edit and refresh the extension.
 | Harper doesn't check popup | Verify `data-harper-glasses="true"` on textarea in DevTools Inspector |
 | Popup doesn't appear | Check DevTools console for errors, refresh extension |
 | Extension won't load | Verify `manifest.json` is valid, check chrome://extensions details |
-
-## Git Commits
-
-**Harper Glasses:**
-- `de49cc3` Mark textarea with data-harper-glasses attribute
-- `b86a217` Fix Harper detection by using off-screen positioning
-
-**Harper:**
-- `eb5b2dd3` Add support for Harper Glasses popup textarea monitoring
-- `5ffd3c06` Remove unused isVisible import
