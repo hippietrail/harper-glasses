@@ -203,7 +203,15 @@
     });
 
     const titleText = document.createElement("span");
-    titleText.textContent = "🧐 Harper Glasses • Check if Harper is enabled for this site";
+    // Simple Harper installation detection
+    const harperElement = document.querySelector('harper-render-box');
+    console.log(`🥽 Harper Glasses: harper-render-box found: ${!!harperElement}`);
+    
+    const harperInstalled = !!harperElement;
+    console.log(`🥽 Harper Glasses: Harper installed: ${harperInstalled}`);
+    
+    const statusIcon = harperInstalled ? '🪉😎' : '🪉😐';
+    titleText.textContent = `${statusIcon} Harper Glasses`;
     titleBar.appendChild(titleText);
 
     // Create close button
@@ -265,25 +273,81 @@
     textareaWrapper.appendChild(textarea);
     container.appendChild(textareaWrapper);
 
-    // Create resize handle
+    // Create status bar
+    const statusBar = document.createElement("div");
+    Object.assign(statusBar.style, {
+      backgroundColor: "#f8f9fa",
+      borderTop: "1px solid #ccc",
+      padding: "6px 12px",
+      fontSize: "12px",
+      color: "#666",
+      fontFamily: "system-ui, -apple-system, sans-serif",
+    });
+    
+    // Use the same simple Harper installation check
+    statusBar.textContent = `Harper: ${harperInstalled ? 'Installed (check if enabled for this site)' : 'Not installed'}`;
+    
+    // Add resize handle to status bar
     const resizeHandle = document.createElement("div");
     resizeHandle.id = "hgl-resize";
-    resizeHandle.textContent = "⋱";
+    resizeHandle.textContent = "";
     Object.assign(resizeHandle.style, {
       position: "absolute",
       bottom: "0",
       right: "0",
-      width: "16px",
-      height: "16px",
-      cursor: "nwse-resize",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      fontSize: "14px",
-      color: "#999",
+      width: "20px",
+      height: "20px",
+      cursor: "se-resize",
+      background: "linear-gradient(135deg, transparent 50%, #ccc 50%)",
+      zIndex: "10",
+    });
+    
+    // Make status bar relative positioning for resize handle
+    statusBar.style.position = "relative";
+    statusBar.appendChild(resizeHandle);
+    
+    container.appendChild(statusBar);
+
+    // Function to update Harper status
+    function updateHarperStatus() {
+      const harperElement = document.querySelector('harper-render-box');
+      const newInstalled = !!harperElement;
+      
+      if (newInstalled !== harperInstalled) {
+        console.log(`🥽 Harper Glasses: Harper installation status changed from ${harperInstalled} to ${newInstalled}`);
+        
+        // Update title bar
+        const statusIcon = newInstalled ? '🪉😎' : '🪉😐';
+        titleText.textContent = `${statusIcon} Harper Glasses`;
+        
+        // Update status bar
+        statusBar.textContent = `Harper: ${newInstalled ? 'Installed (check if enabled for this site)' : 'Not installed'}`;
+      }
+    }
+
+    // Watch for Harper installation/uninstallation
+    const observer = new MutationObserver((mutations) => {
+      const hasHarperChanges = mutations.some(mutation => {
+        return Array.from(mutation.addedNodes).some(node => 
+          node.nodeType === Node.ELEMENT_NODE && node.tagName === 'HARPER-RENDER-BOX'
+        ) || Array.from(mutation.removedNodes).some(node => 
+          node.nodeType === Node.ELEMENT_NODE && node.tagName === 'HARPER-RENDER-BOX'
+        );
+      });
+      
+      if (hasHarperChanges) {
+        console.log(`🥽 Harper Glasses: detected Harper installation change, updating status`);
+        updateHarperStatus();
+      }
     });
 
-    textareaWrapper.appendChild(resizeHandle);
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
+
+    // Create resize handle - moved to status bar above
+
     isUsingContentEditable = false;
 
     document.body.appendChild(container);
