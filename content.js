@@ -1,6 +1,6 @@
 (() => {
   // Build ID for debugging - update this when making changes
-  const BUILD_ID = "v0.0.4-" + new Date().toISOString().slice(0, 10);
+  const BUILD_ID = "v0.0.3-" + new Date().toISOString().slice(0, 10);
   console.log(`🥽 Harper Glasses [${BUILD_ID}] initializing`);
 
   let container = null;
