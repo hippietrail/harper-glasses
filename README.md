@@ -5,68 +5,53 @@ A Chrome extension that adds a popup textarea for checking text on read-only web
 ## How It Works
 
 1. Click the Harper Glasses 👓 button on any webpage
-2. A textarea popup appears with your selected text (if any)
-3. Harper automatically checks for grammar/spelling errors
-4. Press Escape to close the popup
+2. A popup appears with your selected text (if any)
+3. Status bar indicates if Harper is installed. (But we can't yet detect if it's enabled for the current site.)
+4. Harper automatically checks for grammar/spelling errors
+5. Press Escape or click ✕ to close
 
-## Architecture
+## Features
 
-**Harper Glasses** (this extension):
-- Creates popup textarea on-screen at runtime
-- Marks textarea with `data-harper-glasses="true"` attribute
-- Uses off-screen positioning for hidden state (not `display: none`)
+- **Harper Detection** - Automatically detects Harper installation status
+- **Drag & Resize** - Move and resize the popup window
 
-**Harper Integration**:
-- Harper recognizes the marker attribute
-- `isVisibleOrMonitored()` function allows monitoring off-screen marked elements
-- Grammar checker runs on popup textarea just like normal form fields
+## Installation
 
-## Building & Testing
-
-### Setup Harper Glasses
 ```bash
+# Load Harper Glasses
 cd /Users/hippietrail/harper-glasses
-# No build needed - load directly in Chrome
 chrome://extensions → Load unpacked → /Users/hippietrail/harper-glasses
-```
 
-### Build Harper Extension
-```bash
+# Build and load Harper (optional)
 cd /Users/hippietrail/harper-the-second/harper
 just build-chrome-plugin
-# Output: packages/chrome-plugin/build/
+# Load both extensions in chrome://extensions
 ```
 
-Then load both in Chrome at `chrome://extensions`.
+## Testing
 
-### Quick Test
-1. Visit Wikipedia or any read-only site
-2. Select text (e.g., "me and him is happy")
-3. Click 👓 button
-4. Harper should show grammar errors in popup
+1. Visit any read-only site (Wikipedia, etc.)
+2. Select text you want to check for spelling and grammar errors
+3. Click 👓 button - popup shows Harper status
+4. Use Haper as per usual. Note that this won't actually modify the website - it's just for checking
 
-### Development Mode (Hot Reload)
+## Development
+
 ```bash
+# Harper development mode (auto-reload)
 cd /Users/hippietrail/harper-the-second/harper
 just dev-chrome-plugin
 ```
-Changes auto-reload—just edit and refresh the extension.
 
-## Key Files
+## Files
 
-**Harper Glasses:**
-- `content.js` - Creates/manages popup textarea
-- `manifest.json` - Extension config
-
-**Harper Integration:**
-- `harper/packages/lint-framework/src/lint/domUtils.ts` - `isVisibleOrMonitored()` function
-- `harper/packages/lint-framework/src/lint/LintFramework.ts` - Uses new visibility check
-- `harper/packages/chrome-plugin/src/contentScript/index.ts` - Scans for marked textareas
+- `content.js` - Main extension logic with Harper detection
+- `manifest.json` - Extension configuration
 
 ## Troubleshooting
 
 | Problem | Solution |
 |---------|----------|
-| Harper doesn't check popup | Verify `data-harper-glasses="true"` on textarea in DevTools Inspector |
+| Harper status shows 🪉😐 | Install Harper extension and enable it for the current site |
 | Popup doesn't appear | Check DevTools console for errors, refresh extension |
 | Extension won't load | Verify `manifest.json` is valid, check chrome://extensions details |
