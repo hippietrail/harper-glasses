@@ -19,11 +19,11 @@ A Chrome extension that adds a popup textarea for checking text on read-only web
 
 ```bash
 # Load Harper Glasses
-cd /Users/hippietrail/harper-glasses
-chrome://extensions → Load unpacked → /Users/hippietrail/harper-glasses
+cd harper-glasses
+chrome://extensions → Load unpacked → harper-glasses
 
 # Build and load Harper (optional)
-cd /Users/hippietrail/harper-the-second/harper
+cd harper
 just build-chrome-plugin
 # Load both extensions in chrome://extensions
 ```
@@ -33,13 +33,13 @@ just build-chrome-plugin
 1. Visit any read-only site (Wikipedia, etc.)
 2. Select text you want to check for spelling and grammar errors
 3. Click 👓 button - popup shows Harper status
-4. Use Haper as per usual. Note that this won't actually modify the website - it's just for checking
+4. Use Harper as per usual. Note that this won't actually modify the website - it's just for checking
 
 ## Development
 
 ```bash
 # Harper development mode (auto-reload)
-cd /Users/hippietrail/harper-the-second/harper
+cd harper
 just dev-chrome-plugin
 ```
 
